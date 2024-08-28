@@ -1,9 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
-import Notes from "../screens/Notes"
+import NotesScreen from "../screens/NotesScreen"
 import LoginScreen from "../screens/LoginScreen";
-
 
 
 const Stack = createNativeStackNavigator();
@@ -16,7 +14,6 @@ export default function AppNavigator() {
 
 
         
-      
 <Stack.Screen
           name="Login"
           component={LoginScreen}
@@ -29,18 +26,12 @@ export default function AppNavigator() {
 
         <Stack.Screen
           name="Notes"
-          component={Notes}
+          component={NotesScreen}
           options={{
             title: "Inserir Nota",
             headerShown: false,
           }}
         />
-
-        
-
-
-
-    
 
       
       </Stack.Navigator>

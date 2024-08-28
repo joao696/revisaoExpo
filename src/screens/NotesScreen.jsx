@@ -45,23 +45,22 @@
           {showLinks && (
             <View style={styles.linksContainer}>
               <TouchableOpacity style={styles.link}>
-                <MaterialIcons name="link" size={24} color="#007bff" />
+                <MaterialIcons name="checklist" size={24} color="#007bff" />
                 <Text style={styles.linkText}>Link 1</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.link}>
-                <MaterialIcons name="link" size={24} color="#007bff" />
-                <Text style={styles.linkText}>Link 2</Text>
+                <MaterialIcons name="event" size={24} color="#007bff" />
               </TouchableOpacity>
               <TouchableOpacity style={styles.link}>
-                <MaterialIcons name="link" size={24} color="#007bff" />
+                <MaterialIcons name="send" size={24} color="#007bff" />
                 <Text style={styles.linkText}>Link 3</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.link}>
-                <MaterialIcons name="link" size={24} color="#007bff" />
+                <MaterialIcons name="delete" size={24} color="#007bff" />
                 <Text style={styles.linkText}>Link 4</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.link}>
-                <MaterialIcons name="link" size={24} color="#007bff" />
+                <MaterialIcons name="settings" size={24} color="#007bff" />
                 <Text style={styles.linkText}>Link 5</Text>
               </TouchableOpacity>
             </View>
