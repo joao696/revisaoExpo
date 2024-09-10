@@ -16,7 +16,6 @@ const App = () => {
   const [selectedNoteIndex, setSelectedNoteIndex] = useState(null);
   const [isListView, setIsListView] = useState(false); // false para visualização em linha, true para visualização em coluna
 
-
   useEffect(() => {
     const loadNotes = async () => {
       try {
@@ -126,27 +125,24 @@ const App = () => {
     closeEditModal();
   };
 
-
   const toggleViewMode = () => {
     setIsListView(!isListView);
   };
-  
-
-
 
   return (
     <View style={[styles.container, { backgroundColor: tema }]}>
       <View style={styles.header}>
-      <View style={styles.headerInner}>
-  <View style={styles.titleContainer}>
-    <MaterialIcons name="lightbulb" size={28} color="#007bff" />
-    <Text style={styles.headerText}>Notas</Text>
-  </View>
-  <TouchableOpacity style={styles.menuButton} onPress={toggleLinks}>
-    <MaterialIcons name="menu" size={24} color="#007bff" />
-  </TouchableOpacity>
-</View>
+        <TouchableOpacity style={styles.menuButton} onPress={toggleLinks}>
+          <MaterialIcons name="menu" size={24} color="#007bff" />
+        </TouchableOpacity>
 
+        {/* Search Bar */}
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Pesquisar notas..."
+          value={searchQuery}
+          onChangeText={handleSearchChange}
+        />
       </View>
 
       {showLinks && (
@@ -174,82 +170,59 @@ const App = () => {
         </View>
       )}
 
-      {/* Search Bar */}
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Pesquisar notas..."
-        value={searchQuery}
-        onChangeText={handleSearchChange}
-      />
-
       <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Nome da nota..."
-          value={noteName}
-          onChangeText={handleNoteNameChange}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Criar uma nota..."
-          value={noteText}
-          onChangeText={handleNoteChange}
-          onSubmitEditing={handleSubmit}
-          returnKeyType="done"
-        />
-        <TouchableOpacity style={styles.addButton} onPress={addNote}>
+        <TouchableOpacity style={styles.addButton} onPress={() => setIsModalVisible(true)}>
           <Text style={styles.addButtonText}>+</Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.notesContainer}>
-  {filteredNotes.length === 0 ? (
-    <View style={styles.emptyStateContainer}>
-      <MaterialIcons name="lightbulb" size={60} color="#888" />
-      <Text style={styles.emptyStateText}>As suas notas são exibidas aqui.</Text>
-    </View>
-  ) : (
-    <FlatList
-    data={filteredNotes}
-    renderItem={({ item, index }) => (
-      <View style={[styles.noteContainer, { backgroundColor: item.color }]}>
-        <TouchableOpacity onPress={() => openEditModal(index)} style={styles.noteContent}>
-          <Text style={styles.noteTitle}>{item.name}</Text>
-          <Text style={styles.note}>{item.text}</Text>
-        </TouchableOpacity>
-        <View style={styles.noteActions}>
-          <TouchableOpacity
-            style={[styles.pinButton, { marginRight: 10 }]}
-            onPress={() => {
-              const updatedNotes = [...notes];
-              updatedNotes[index].isPinned = !updatedNotes[index].isPinned;
-              setNotes(updatedNotes);
-            }}
-          >
-            <MaterialIcons
-              name={item.isPinned ? "push-pin" : "push-pin-outlined"}
-              size={24}
-              color={item.isPinned ? "#007bff" : "#ccc"}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={() => deleteNote(index)}
-          >
-            <Text style={styles.deleteButtonText}>X</Text>
-          </TouchableOpacity>
-        </View>
+        {filteredNotes.length === 0 ? (
+          <View style={styles.emptyStateContainer}>
+            <MaterialIcons name="lightbulb" size={60} color="#888" />
+            <Text style={styles.emptyStateText}>As suas notas são exibidas aqui.</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredNotes}
+            renderItem={({ item, index }) => (
+              <View style={[styles.noteContainer, { backgroundColor: item.color }]}>
+                <TouchableOpacity onPress={() => openEditModal(index)} style={styles.noteContent}>
+                  <Text style={styles.noteTitle}>{item.name}</Text>
+                  <Text style={styles.note}>{item.text}</Text>
+                </TouchableOpacity>
+                <View style={styles.noteActions}>
+                  <TouchableOpacity
+                    style={[styles.pinButton, { marginRight: 10 }]}
+                    onPress={() => {
+                      const updatedNotes = [...notes];
+                      updatedNotes[index].isPinned = !updatedNotes[index].isPinned;
+                      setNotes(updatedNotes);
+                    }}
+                  >
+                    <MaterialIcons
+                      name={item.isPinned ? "push-pin" : "push-pin-outlined"}
+                      size={24}
+                      color={item.isPinned ? "#007bff" : "#ccc"}
+                    />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => deleteNote(index)}
+                  >
+                    <Text style={styles.deleteButtonText}>X</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+            keyExtractor={(item, index) => index.toString()}
+            horizontal={!isListView} // Se não for visualização em lista, exibe horizontalmente
+            showsHorizontalScrollIndicator={false}
+          />
+        )}
       </View>
-    )}
-    keyExtractor={(item, index) => index.toString()}
-    horizontal={!isListView} // Se não for visualização em lista, exibe horizontalmente
-    showsHorizontalScrollIndicator={false}
-  />
-  
-  )}
-</View>
 
-      {/* Modal for Editing Note */}
+      {/* Modal for Adding/Editing Note */}
       <Modal
         visible={isModalVisible}
         animationType="slide"
@@ -258,7 +231,7 @@ const App = () => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Editar Nota</Text>
+            <Text style={styles.modalTitle}>{selectedNoteIndex !== null ? 'Editar Nota' : 'Adicionar Nota'}</Text>
             <TextInput
               style={styles.modalInput}
               placeholder="Nome da nota..."
@@ -267,10 +240,10 @@ const App = () => {
             />
             <TextInput
               style={[styles.modalInput, { height: 100 }]}
-              placeholder="Editar texto da nota..."
+              placeholder="Digite sua anotação..."
+              multiline={true}
               value={noteText}
               onChangeText={handleNoteChange}
-              multiline={true}
             />
             <View style={styles.colorPickerContainer}>
               <Text style={styles.colorPickerLabel}>Escolha a cor:</Text>
@@ -280,31 +253,23 @@ const App = () => {
                 onValueChange={(itemValue) => handleNoteColorChange(itemValue)}
               >
                 <Picker.Item label="Branco" value="#ffffff" />
-                <Picker.Item label="Amarelo Claro" value="#ffffe0" />
-                <Picker.Item label="Rosa Claro" value="#ffb6c1" />
-                <Picker.Item label="Verde Claro" value="#d3ffd3" />
-                <Picker.Item label="Azul Claro" value="#add8e6" />
+                <Picker.Item label="Amarelo" value="#ffff99" />
+                <Picker.Item label="Verde" value="#ccffcc" />
+                <Picker.Item label="Azul" value="#cce5ff" />
+                <Picker.Item label="Rosa" value="#f5c6cb" />
               </Picker>
             </View>
             <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.saveButton} onPress={saveEditedNote}>
-                <Text style={styles.saveButtonText}>Salvar</Text>
+              <TouchableOpacity style={styles.modalButton} onPress={closeEditModal}>
+                <Text style={styles.modalButtonText}>Cancelar</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.cancelButton} onPress={closeEditModal}>
-                <Text style={styles.cancelButtonText}>Cancelar</Text>
+              <TouchableOpacity style={styles.modalButton} onPress={saveEditedNote}>
+                <Text style={styles.modalButtonText}>Salvar</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
-
-      <TouchableOpacity style={styles.themeButton} onPress={trocaTema}>
-        <MaterialIcons name="contrast" size={24} color="#007bff" />
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.viewToggleButton} onPress={toggleViewMode}>
-  <MaterialIcons name={isListView ? "view-cozy" : "view-stream"} size={24} color="#007bff" />
-</TouchableOpacity>
-
     </View>
   );
 };
@@ -312,217 +277,166 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  icon: {
-    color: '#000000',
+    padding: 10,
   },
   header: {
-    backgroundColor: '#f0f0f0',
-    padding: 15,
-    width: '100%',
-  },
-  headerInner: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 10,
   },
-  titleContainer: {
-    flexDirection: 'row', // Alinha o ícone e o texto em linha
-    alignItems: 'center', // Garante que o ícone e o texto fiquem centralizados verticalmente
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginLeft: 10, // Adiciona espaço entre o ícone e o texto
-  },  
   menuButton: {
-    marginRight: 1750,
-  },
-  linksContainer: {
-    position: 'absolute', // Position the links absolute
-    top: 60, // Adjust this to place the links below the header
-    left: 15, // Adjust this to align the links properly
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    padding: 10,
-    zIndex: 1, // Make sure the links are on top of other elements
-  },
-  link: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-  },
-  linkText: {
-    marginLeft: 8,
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000000',
+    marginRight: 10,
   },
   searchInput: {
-    borderWidth: 1,
+    flex: 1,
+    height: 40,
     borderColor: '#ccc',
-    padding: 10,
-    margin: 15,
+    borderWidth: 1,
     borderRadius: 5,
-    marginHorizontal: '28%',
-    width: '40%',
-    marginLeft: '30%',
+    paddingHorizontal: 10,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    width: '40%',
-    marginLeft: '30%',
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginRight: 10,
-    borderRadius: 5,
-  },
-  themeButton: {
     position: 'absolute',
-    top: 15,
-    right: 15,
+    bottom: 20,
+    right: 20,
   },
   addButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   addButtonText: {
     color: '#fff',
+    fontSize: 30,
     fontWeight: 'bold',
   },
   notesContainer: {
-    padding: 15,
-    flexWrap: 'wrap',
-    flexDirection: 'row',
-    marginLeft: 300,
-    marginTop: 100,
+    flex: 1,
+  },
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyStateText: {
+    fontSize: 18,
+    color: '#888',
+    textAlign: 'center',
   },
   noteContainer: {
     padding: 10,
-    marginRight: 10,
+    marginVertical: 5,
     borderRadius: 5,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
   noteContent: {
     flex: 1,
   },
-  note: {
-    fontSize: 16,
-    marginTop: 10,
-  },
   noteTitle: {
-    fontSize: 18,
     fontWeight: 'bold',
+    fontSize: 18,
+  },
+  note: {
+    marginTop: 5,
+    fontSize: 16,
   },
   noteActions: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 10,
   },
   pinButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginRight: 10,
   },
   deleteButton: {
-    backgroundColor: '#ff0000',
-    padding: 5,
+    backgroundColor: '#ff4d4d',
     borderRadius: 5,
+    padding: 5,
   },
   deleteButtonText: {
     color: '#fff',
+    fontSize: 16,
     fontWeight: 'bold',
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
+    width: '90%',
     backgroundColor: '#fff',
-    padding: 20,
     borderRadius: 10,
-    width: '30%',
+    padding: 20,
   },
   modalTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 15,
+    marginBottom: 10,
   },
   modalInput: {
-    borderWidth: 1,
     borderColor: '#ccc',
-    padding: 10,
+    borderWidth: 1,
     borderRadius: 5,
-    marginBottom: 15,
+    padding: 10,
+    marginBottom: 10,
   },
   colorPickerContainer: {
-    marginBottom: 15,
-  },
-  colorPicker: {
-    width: '100%',
-    height: 50,
+    marginBottom: 10,
   },
   colorPickerLabel: {
     fontSize: 16,
     marginBottom: 5,
   },
+  colorPicker: {
+    height: 50,
+    width: '100%',
+  },
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  saveButton: {
-    backgroundColor: '#007bff',
+  modalButton: {
     padding: 10,
+    backgroundColor: '#007bff',
     borderRadius: 5,
-    flex: 1,
+  },
+  modalButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  linksContainer: {
+    position: 'absolute',
+    top: 60,
+    left: 0, // Alinhado à esquerda
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    padding: 10,
+    zIndex: 1,
+    width: 200,
+  },
+  link: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 5,
+  },
+  icon: {
     marginRight: 10,
   },
-  saveButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center',
+  linkText: {
+    fontSize: 16,
   },
-  cancelButton: {
-    backgroundColor: '#ff0000',
-    padding: 10,
-    borderRadius: 5,
-    flex: 1,
-  },
-  cancelButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  emptyStateContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 300,
-    marginTop: 100,
-  },
-  emptyStateText: {
-    fontSize: 30,
-    color: '#888',
-    marginTop: 10, // Espaçamento entre o ícone e o texto
-  },
-  viewToggleButton: {
-    position: 'absolute',
-    top: 15,
-    right: 50, // Ajuste conforme a necessidade para ficar ao lado do botão de troca de cor
-  },
-  
 });
 
 export default App;
