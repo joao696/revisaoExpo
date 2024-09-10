@@ -72,11 +72,8 @@ const App = () => {
       setNoteName('');
       setNoteColor('#ffffff'); // Reset color to default
       setIsPinned(false); // Reset pin status
+      setIsModalVisible(false); // Fecha o modal ao adicionar a nota
     }
-  };
-
-  const handleSubmit = () => {
-    addNote();
   };
 
   const deleteNote = (index) => {
@@ -132,17 +129,17 @@ const App = () => {
   return (
     <View style={[styles.container, { backgroundColor: tema }]}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.menuButton} onPress={toggleLinks}>
-          <MaterialIcons name="menu" size={24} color="#007bff" />
-        </TouchableOpacity>
-
-        {/* Search Bar */}
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Pesquisar notas..."
-          value={searchQuery}
-          onChangeText={handleSearchChange}
-        />
+        <View style={styles.headerInner}>
+          <TouchableOpacity style={styles.menuButton} onPress={toggleLinks}>
+            <MaterialIcons name="menu" size={24} color="#007bff" />
+          </TouchableOpacity>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Pesquisar notas..."
+            value={searchQuery}
+            onChangeText={handleSearchChange}
+          />
+        </View>
       </View>
 
       {showLinks && (
@@ -169,12 +166,6 @@ const App = () => {
           </TouchableOpacity>
         </View>
       )}
-
-      <View style={styles.inputContainer}>
-        <TouchableOpacity style={styles.addButton} onPress={() => setIsModalVisible(true)}>
-          <Text style={styles.addButtonText}>+</Text>
-        </TouchableOpacity>
-      </View>
 
       <View style={styles.notesContainer}>
         {filteredNotes.length === 0 ? (
@@ -222,7 +213,7 @@ const App = () => {
         )}
       </View>
 
-      {/* Modal for Adding/Editing Note */}
+      {/* Modal for Adding and Editing Note */}
       <Modal
         visible={isModalVisible}
         animationType="slide"
@@ -231,7 +222,7 @@ const App = () => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{selectedNoteIndex !== null ? 'Editar Nota' : 'Adicionar Nota'}</Text>
+            <Text style={styles.modalTitle}>Adicionar Nota</Text>
             <TextInput
               style={styles.modalInput}
               placeholder="Nome da nota..."
@@ -240,10 +231,10 @@ const App = () => {
             />
             <TextInput
               style={[styles.modalInput, { height: 100 }]}
-              placeholder="Digite sua anotação..."
-              multiline={true}
+              placeholder="Texto da nota..."
               value={noteText}
               onChangeText={handleNoteChange}
+              multiline={true}
             />
             <View style={styles.colorPickerContainer}>
               <Text style={styles.colorPickerLabel}>Escolha a cor:</Text>
@@ -253,23 +244,31 @@ const App = () => {
                 onValueChange={(itemValue) => handleNoteColorChange(itemValue)}
               >
                 <Picker.Item label="Branco" value="#ffffff" />
-                <Picker.Item label="Amarelo" value="#ffff99" />
-                <Picker.Item label="Verde" value="#ccffcc" />
-                <Picker.Item label="Azul" value="#cce5ff" />
-                <Picker.Item label="Rosa" value="#f5c6cb" />
+                <Picker.Item label="Amarelo Claro" value="#ffffe0" />
+                <Picker.Item label="Rosa Claro" value="#ffb6c1" />
+                <Picker.Item label="Verde Claro" value="#d3ffd3" />
+                <Picker.Item label="Azul Claro" value="#add8e6" />
               </Picker>
             </View>
             <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.modalButton} onPress={closeEditModal}>
-                <Text style={styles.modalButtonText}>Cancelar</Text>
+              <TouchableOpacity style={styles.saveButton} onPress={addNote}>
+                <Text style={styles.saveButtonText}>Salvar</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalButton} onPress={saveEditedNote}>
-                <Text style={styles.modalButtonText}>Salvar</Text>
+              <TouchableOpacity style={styles.cancelButton} onPress={closeEditModal}>
+                <Text style={styles.cancelButtonText}>Cancelar</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
+      
+      {/* Botão "+" no canto inferior direito */}
+      <TouchableOpacity
+        style={styles.floatingButton}
+        onPress={() => setIsModalVisible(true)}
+      >
+        <MaterialIcons name="add" size={28} color="#fff" />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -277,44 +276,64 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    padding: 20,
   },
   header: {
+    paddingVertical: 10,
+  },
+  headerInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
-  },
-  menuButton: {
-    marginRight: 10,
   },
   searchInput: {
+    backgroundColor: '#f0f0f0',
+    padding: 10,
+    borderRadius: 8,
     flex: 1,
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
+    marginLeft: 10, // Ajuste aqui para garantir espaço entre o botão e o campo de pesquisa
   },
-  inputContainer: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
+  menuButton: {
+    padding: 10,
   },
-  addButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#007bff',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  addButtonText: {
-    color: '#fff',
-    fontSize: 30,
-    fontWeight: 'bold',
+  linksContainer: {
+    // Adicione estilos para links aqui
   },
   notesContainer: {
     flex: 1,
+  },
+  noteContainer: {
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  noteContent: {
+    flex: 1,
+  },
+  noteTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  note: {
+    fontSize: 16,
+    marginTop: 5,
+  },
+  noteActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  pinButton: {
+    padding: 5,
+  },
+  deleteButton: {
+    padding: 5,
+    backgroundColor: '#ff5c5c',
+    borderRadius: 5,
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
   emptyStateContainer: {
     flex: 1,
@@ -322,59 +341,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emptyStateText: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#888',
-    textAlign: 'center',
-  },
-  noteContainer: {
-    padding: 10,
-    marginVertical: 5,
-    borderRadius: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  noteContent: {
-    flex: 1,
-  },
-  noteTitle: {
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
-  note: {
-    marginTop: 5,
-    fontSize: 16,
-  },
-  noteActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  pinButton: {
-    marginRight: 10,
-  },
-  deleteButton: {
-    backgroundColor: '#ff4d4d',
-    borderRadius: 5,
-    padding: 5,
-  },
-  deleteButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
     width: '90%',
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 8,
     padding: 20,
   },
   modalTitle: {
@@ -383,17 +362,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   modalInput: {
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
+    backgroundColor: '#f0f0f0',
     padding: 10,
+    borderRadius: 8,
     marginBottom: 10,
   },
   colorPickerContainer: {
-    marginBottom: 10,
+    marginBottom: 20,
   },
   colorPickerLabel: {
     fontSize: 16,
+    fontWeight: 'bold',
     marginBottom: 5,
   },
   colorPicker: {
@@ -404,38 +383,35 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  modalButton: {
-    padding: 10,
+  saveButton: {
     backgroundColor: '#007bff',
-    borderRadius: 5,
+    padding: 10,
+    borderRadius: 8,
   },
-  modalButtonText: {
+  saveButtonText: {
     color: '#fff',
-    fontSize: 16,
     fontWeight: 'bold',
   },
-  linksContainer: {
+  cancelButton: {
+    backgroundColor: '#ff5c5c',
+    padding: 10,
+    borderRadius: 8,
+  },
+  cancelButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  floatingButton: {
     position: 'absolute',
-    top: 60,
-    left: 0, // Alinhado à esquerda
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    padding: 10,
-    zIndex: 1,
-    width: 200,
-  },
-  link: {
-    flexDirection: 'row',
+    bottom: 30,
+    right: 30,
+    backgroundColor: '#007bff',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 5,
-  },
-  icon: {
-    marginRight: 10,
-  },
-  linkText: {
-    fontSize: 16,
+    elevation: 8, // Sombra para destacar o botão
   },
 });
 
