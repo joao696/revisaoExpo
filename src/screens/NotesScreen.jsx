@@ -15,6 +15,7 @@ const App = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedNoteIndex, setSelectedNoteIndex] = useState(null);
   const [isListView, setIsListView] = useState(false); // false para visualização em linha, true para visualização em coluna
+  const [isProfileModalVisible, setIsProfileModalVisible] = useState(false); // Modal para perfil
 
   useEffect(() => {
     const loadNotes = async () => {
@@ -126,6 +127,10 @@ const App = () => {
     setIsListView(!isListView);
   };
 
+  const toggleProfileModal = () => {
+    setIsProfileModalVisible(!isProfileModalVisible);
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: tema }]}>
       <View style={styles.header}>
@@ -133,38 +138,53 @@ const App = () => {
           <TouchableOpacity style={styles.menuButton} onPress={toggleLinks}>
             <MaterialIcons name="menu" size={24} color="#007bff" />
           </TouchableOpacity>
+
           <TextInput
             style={styles.searchInput}
             placeholder="Pesquisar notas..."
             value={searchQuery}
             onChangeText={handleSearchChange}
           />
+
+          {/* Botão para alternar entre visualização horizontal e vertical */}
+          <TouchableOpacity style={styles.toggleViewButton} onPress={toggleViewMode}>
+            <MaterialIcons
+              name={isListView ? "view-stream" : "view-column"}
+              size={24}
+              color="#007bff"
+            />
+          </TouchableOpacity>
+
+          {/* Ícone de perfil */}
+          <TouchableOpacity style={styles.profileButton} onPress={toggleProfileModal}>
+            <MaterialIcons name="account-circle" size={24} color="#007bff" />
+          </TouchableOpacity>
+
+          {/* Modal para gerenciar perfil */}
+          <Modal visible={isProfileModalVisible} animationType="slide" transparent={true}>
+            <View style={styles.profileModalContainer}>
+              <View style={styles.profileModal}>
+                <Text style={styles.profileModalTitle}>Gerenciar Conta</Text>
+                <TouchableOpacity style={styles.profileOption}>
+                  <Text style={styles.profileOptionText}>Minha Conta</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.profileOption}>
+                  <Text style={styles.profileOptionText}>Adicionar Outra Conta</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.closeProfileModalButton} onPress={toggleProfileModal}>
+                  <Text style={styles.closeProfileModalButtonText}>Fechar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
         </View>
       </View>
 
       {showLinks && (
         <View style={styles.linksContainer}>
-          <TouchableOpacity style={styles.link}>
-            <MaterialIcons style={styles.icon} name="checklist" size={24} color="#007bff" />
-            <Text style={styles.linkText}>Link 1</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.link}>
-            <MaterialIcons style={styles.icon} name="event" size={24} color="#007bff" />
-            <Text style={styles.linkText}>Link 2</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.link}>
-            <MaterialIcons style={styles.icon} name="send" size={24} color="#007bff" />
-            <Text style={styles.linkText}>Link 3</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.link}>
-            <MaterialIcons style={styles.icon} name="delete" size={24} color="#007bff" />
-            <Text style={styles.linkText}>Link 4</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.link}>
-            <MaterialIcons style={styles.icon} name="settings" size={24} color="#007bff" />
-            <Text style={styles.linkText}>Link 5</Text>
-          </TouchableOpacity>
-        </View>
+          <Text style={styles.linkText}>Link 1</Text>
+          <Text style={styles.linkText}>Link 2</Text>
+          <Text style={styles.linkText}>Link 3</Text>        </View>
       )}
 
       <View style={styles.notesContainer}>
@@ -191,11 +211,7 @@ const App = () => {
                       setNotes(updatedNotes);
                     }}
                   >
-                    <MaterialIcons
-                      name={item.isPinned ? "push-pin" : "push-pin-outlined"}
-                      size={24}
-                      color={item.isPinned ? "#007bff" : "#ccc"}
-                    />
+                    
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.deleteButton}
@@ -236,38 +252,51 @@ const App = () => {
               onChangeText={handleNoteChange}
               multiline={true}
             />
-            <View style={styles.colorPickerContainer}>
-              <Text style={styles.colorPickerLabel}>Escolha a cor:</Text>
+            <View style={styles.modalRow}>
+              <Text style={styles.modalLabel}>Cor da Nota:</Text>
               <Picker
                 selectedValue={noteColor}
-                style={styles.colorPicker}
-                onValueChange={(itemValue) => handleNoteColorChange(itemValue)}
+                style={styles.modalPicker}
+                onValueChange={handleNoteColorChange}
               >
                 <Picker.Item label="Branco" value="#ffffff" />
-                <Picker.Item label="Amarelo Claro" value="#ffffe0" />
-                <Picker.Item label="Rosa Claro" value="#ffb6c1" />
-                <Picker.Item label="Verde Claro" value="#d3ffd3" />
-                <Picker.Item label="Azul Claro" value="#add8e6" />
+                <Picker.Item label="Amarelo" value="#ffeb3b" />
+                <Picker.Item label="Azul" value="#2196f3" />
+                <Picker.Item label="Verde" value="#4caf50" />
+                <Picker.Item label="Vermelho" value="#f44336" />
               </Picker>
             </View>
-            <View style={styles.modalButtons}>
-              <TouchableOpacity style={styles.saveButton} onPress={addNote}>
-                <Text style={styles.saveButtonText}>Salvar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.cancelButton} onPress={closeEditModal}>
-                <Text style={styles.cancelButtonText}>Cancelar</Text>
+            <View style={styles.modalRow}>
+              <Text style={styles.modalLabel}>Fixar Nota:</Text>
+              <TouchableOpacity onPress={handlePinToggle}>
+                <MaterialIcons
+                  name={isPinned ? "push-pin" : "push-pin-outlined"}
+                  size={24}
+                  color={isPinned ? "#007bff" : "#ccc"}
+                />
               </TouchableOpacity>
             </View>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={selectedNoteIndex !== null ? saveEditedNote : addNote}
+            >
+              <Text style={styles.modalButtonText}>
+                {selectedNoteIndex !== null ? 'Salvar Alterações' : 'Adicionar Nota'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.modalButtonClose} onPress={closeEditModal}>
+              <Text style={styles.modalButtonText}>Cancelar</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
-      
-      {/* Botão "+" no canto inferior direito */}
-      <TouchableOpacity
-        style={styles.floatingButton}
-        onPress={() => setIsModalVisible(true)}
-      >
-        <MaterialIcons name="add" size={28} color="#fff" />
+
+      <TouchableOpacity style={styles.addButton} onPress={() => setIsModalVisible(true)}>
+        <MaterialIcons name="add" size={24} color="#fff" />
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.themeButton} onPress={trocaTema}>
+        <MaterialIcons name="brightness-6" size={24} color="#007bff" />
       </TouchableOpacity>
     </View>
   );
@@ -276,73 +305,123 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingTop: 40,
+    paddingHorizontal: 20,
   },
   header: {
-    paddingVertical: 10,
+    marginBottom: 20,
   },
   headerInner: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   searchInput: {
-    backgroundColor: '#f0f0f0',
-    padding: 10,
-    borderRadius: 8,
     flex: 1,
-    marginLeft: 10, // Ajuste aqui para garantir espaço entre o botão e o campo de pesquisa
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    marginRight: 10,
   },
   menuButton: {
-    padding: 10,
+    marginRight: 10,
   },
-  linksContainer: {
-    // Adicione estilos para links aqui
+  toggleViewButton: {
+    marginRight: 16,
+  },
+  profileButton: {
+    marginLeft: 16,
+  },
+  profileModalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  profileModal: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
+  },
+  profileModalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  profileOption: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginVertical: 5,
+    width: '100%',
+  },
+  profileOptionText: {
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  closeProfileModalButton: {
+    marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#007bff',
+    borderRadius: 5,
+  },
+  closeProfileModalButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
   notesContainer: {
     flex: 1,
   },
+  emptyStateContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  emptyStateText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#888',
+  },
   noteContainer: {
     padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
+    borderRadius: 10,
+    marginVertical: 10,
+    marginRight: 10,
+    width: 130,
+    height: 80,
   },
   noteContent: {
     flex: 1,
   },
   noteTitle: {
-    fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 10,
   },
   note: {
-    fontSize: 16,
-    marginTop: 5,
+    fontSize: 14,
   },
   noteActions: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginTop: 10,
   },
   pinButton: {
-    padding: 5,
+    marginRight: 10,
   },
   deleteButton: {
-    padding: 5,
-    backgroundColor: '#ff5c5c',
-    borderRadius: 5,
+    padding: 3,
+    borderRadius: "30px",
+    marginBottom: 15,
+    backgroundColor: '#ff5252',
   },
   deleteButtonText: {
     color: '#fff',
-    fontWeight: 'bold',
-  },
-  emptyStateContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyStateText: {
-    fontSize: 16,
-    color: '#888',
+    fontSize: 10,
   },
   modalContainer: {
     flex: 1,
@@ -351,57 +430,59 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    width: '90%',
     backgroundColor: '#fff',
-    borderRadius: 8,
     padding: 20,
+    borderRadius: 10,
+    width: '90%',
+    maxWidth: 400,
+    alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
   },
   modalInput: {
-    backgroundColor: '#f0f0f0',
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
     padding: 10,
-    borderRadius: 8,
     marginBottom: 10,
   },
-  colorPickerContainer: {
-    marginBottom: 20,
+  modalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 10,
   },
-  colorPickerLabel: {
+  modalLabel: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 5,
   },
-  colorPicker: {
-    height: 50,
-    width: '100%',
+  modalPicker: {
+    width: '50%',
   },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  saveButton: {
+  modalButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 8,
+    borderRadius: 5,
+    marginTop: 10,
   },
-  saveButtonText: {
+  modalButtonClose: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#ccc',
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  modalButtonText: {
     color: '#fff',
-    fontWeight: 'bold',
+    fontSize: 16,
   },
-  cancelButton: {
-    backgroundColor: '#ff5c5c',
-    padding: 10,
-    borderRadius: 8,
-  },
-  cancelButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  floatingButton: {
+  addButton: {
     position: 'absolute',
     bottom: 30,
     right: 30,
@@ -409,9 +490,18 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    justifyContent: 'center',
     alignItems: 'center',
-    elevation: 8, // Sombra para destacar o botão
+    justifyContent: 'center',
+  },
+  themeButton: {
+    position: 'absolute',
+    bottom: 30,
+    left: 30,
+    backgroundColor: '#fff',
+    borderRadius: 30,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#007bff',
   },
 });
 
